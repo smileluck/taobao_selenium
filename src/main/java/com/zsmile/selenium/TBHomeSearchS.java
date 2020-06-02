@@ -36,73 +36,15 @@ public class TBHomeSearchS implements Runnable {
             webDriver.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS);
 
             JavascriptExecutor driverJs = ((JavascriptExecutor) webDriver);
-            //利用js代码键入搜索关键字
+
+            //执行js避免淘宝识别出webdriver
             driverJs.executeScript("() =>{ Object.defineProperties(navigator,{ webdriver:{ get: () => false } }) }");
             driverJs.executeScript("() =>{ window.navigator.chrome = { runtime: {},  }; }");
             driverJs.executeScript("() =>{ Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] }); }");
             driverJs.executeScript(" () =>{ Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5,6], }); }");
 
+            login();
 
-            webDriver.get("https://login.taobao.com/member/login.jhtml?f=top&redirectURL=https://www.taobao.com");
-            Thread.sleep(5000);
-            WebElement usernameElement = webDriver.findElement(By.id("fm-login-id"));
-            usernameElement.sendKeys(seleniumConfig.getTaobaoAccount());
-
-            WebElement passwordElement = webDriver.findElement(By.id("fm-login-password"));
-            passwordElement.sendKeys(seleniumConfig.getTaobaoPwd());
-            webDriver.findElement(By.className("fm-submit")).click();
-            Thread.sleep(5000);
-            if (checkElement(webDriver, By.id("nc_1_n1z"))) {
-                Actions action = new Actions(webDriver);
-                WebElement hk = webDriver.findElement(By.id("nc_1_n1z"));
-                action.moveToElement(hk).clickAndHold(hk);
-//                action.moveByOffset(200, 0).perform();
-                action.dragAndDropBy(hk
-                        , 258,
-                        0).pause(2000).perform();
-                webDriver.findElement(By.className("fm-submit")).click();
-            }
-            Thread.sleep(5000);
-
-            do {
-                if (webDriver.getCurrentUrl().contains("login.taobao.com/member/login.jhtml")) {
-                    Thread.sleep(10000);
-                } else if (webDriver.getCurrentUrl().contains("login.taobao.com/member/login_unusual.htm")) {
-                    Thread.sleep(5000);
-                    if (checkElement(webDriver, By.xpath("//*[@id=\"content\"]/div/div[1]/iframe"))) {
-//                            Thread.sleep(2000);
-                        WebElement iframe = webDriver.findElement(By.xpath("//*[@id=\"content\"]/div/div[1]/iframe"));
-                        webDriver.switchTo().frame(iframe);
-                        WebElement otherValidator = webDriver.findElement(By.id("otherValidator"));
-                        otherValidator.click();
-                        Thread.sleep(2000);
-                        List<WebElement> liList = webDriver.findElements(By.xpath("//*[@id=\"content\"]/div/ol/li"));
-                        for (WebElement webElement : liList) {
-                            String text = webElement.findElement(By.className("text")).getText();
-                            if (text.contains("手机验证码")) {
-                                WebElement a = webElement.findElement(By.tagName("a"));
-                                a.click();
-                                break;
-                            }
-                        }
-                        Thread.sleep(2000);
-                        WebElement jGetCode = webDriver.findElement(By.id("J_GetCode"));
-                        jGetCode.click();
-                    } else {
-                        if (checkElement(webDriver, By.id("J_Phone_Checkcode"))) {
-                            WebElement jPhoneCheckcode = webDriver.findElement(By.id("J_Phone_Checkcode"));
-                            jPhoneCheckcode.click();
-                            WebElement submitBtn = webDriver.findElement(By.id("submitBtn"));
-                            submitBtn.click();
-                        }
-                    }
-                    Thread.sleep(10000);
-                } else if (webDriver.getCurrentUrl().contains("www.taobao.com")) {
-                    break;
-                } else {
-                    break;
-                }
-            } while (true);
 
             get();
         } catch (Exception e) {
@@ -114,6 +56,76 @@ public class TBHomeSearchS implements Runnable {
             webDriver = null;
 
         }
+    }
+
+    private void login() throws Exception {
+
+        webDriver.get("https://login.taobao.com/member/login.jhtml?f=top&redirectURL=https://www.taobao.com");
+        Thread.sleep(5000);
+        WebElement usernameElement = webDriver.findElement(By.id("fm-login-id"));
+        usernameElement.sendKeys(seleniumConfig.getTaobaoAccount());
+
+        WebElement passwordElement = webDriver.findElement(By.id("fm-login-password"));
+        passwordElement.sendKeys(seleniumConfig.getTaobaoPwd());
+        webDriver.findElement(By.className("fm-submit")).click();
+        Thread.sleep(5000);
+
+        //需要滑块
+        if (checkElement(webDriver, By.id("nc_1_n1z"))) {
+            Actions action = new Actions(webDriver);
+            WebElement hk = webDriver.findElement(By.id("nc_1_n1z"));
+            action.moveToElement(hk).clickAndHold(hk);
+//                action.moveByOffset(200, 0).perform();
+            action.dragAndDropBy(hk
+                    , 258,
+                    0).pause(2000).perform();
+            webDriver.findElement(By.className("fm-submit")).click();
+        }
+        Thread.sleep(5000);
+
+        do {
+            if (webDriver.getCurrentUrl().contains("login.taobao.com/member/login.jhtml")) {
+                Thread.sleep(10000);
+            } else if (webDriver.getCurrentUrl().contains("login.taobao.com/member/login_unusual.htm")) {
+                //需要进行验证手机验证码
+                Thread.sleep(5000);
+                if (checkElement(webDriver, By.xpath("//*[@id=\"content\"]/div/div[1]/iframe"))) {
+//                            Thread.sleep(2000)
+                    WebElement iframe = webDriver.findElement(By.xpath("//*[@id=\"content\"]/div/div[1]/iframe"));
+                    webDriver.switchTo().frame(iframe);
+                    WebElement otherValidator = webDriver.findElement(By.id("otherValidator"));
+                    otherValidator.click();
+                    Thread.sleep(2000);
+                    List<WebElement> liList = webDriver.findElements(By.xpath("//*[@id=\"content\"]/div/ol/li"));
+                    for (WebElement webElement : liList) {
+                        String text = webElement.findElement(By.className("text")).getText();
+                        if (text.contains("手机验证码")) {
+                            WebElement a = webElement.findElement(By.tagName("a"));
+                            a.click();
+                            break;
+                        }
+                    }
+                    Thread.sleep(2000);
+                    WebElement jGetCode = webDriver.findElement(By.id("J_GetCode"));
+                    jGetCode.click();
+                } else {
+                    if (checkElement(webDriver, By.id("J_Phone_Checkcode"))) {
+                        WebElement jPhoneCheckcode = webDriver.findElement(By.id("J_Phone_Checkcode"));
+                        jPhoneCheckcode.click();
+                        if (jPhoneCheckcode.getAttribute("value").length() == 6) {
+                            WebElement submitBtn = webDriver.findElement(By.id("submitBtn"));
+                            submitBtn.click();
+                        }
+                    }
+                }
+                Thread.sleep(10000);
+            } else if (webDriver.getCurrentUrl().contains("www.taobao.com")) {
+                break;
+            } else {
+                break;
+            }
+        } while (true);
+
     }
 
     private void get() {
@@ -138,8 +150,8 @@ public class TBHomeSearchS implements Runnable {
         try {
             webDriver.get(searchHomeUrl + "&q=" + info.getString("name"));
             Thread.sleep(10000);
+
             // 没有找到与xxxx相关的宝贝
-            //
             Boolean cboolean = checkElement(webDriver, By.className("combobar-noquery"));
             Boolean aBoolean = checkElement(webDriver, By.className("item-not-found"));
             if (aBoolean || cboolean) {
@@ -157,6 +169,7 @@ public class TBHomeSearchS implements Runnable {
             List<CheckHomeGoodEntity> checkHomeGoodEntities = new ArrayList<>();
             WebElement items = webDriver.findElement(By.xpath("//div[@id=\"mainsrp-itemlist\"]/div[1]/div[1]/div[1]"));
             List<WebElement> mouserOnverReq = items.findElements(By.className("J_MouserOnverReq"));
+            //便利商品数据
             for (WebElement webElement : mouserOnverReq) {
                 CheckHomeGoodEntity checkHomeGoodEntity = new CheckHomeGoodEntity();
 
@@ -201,6 +214,7 @@ public class TBHomeSearchS implements Runnable {
                 checkHomeGoodEntities.add(checkHomeGoodEntity);
             }
             info.put("checkHomeGoodEntities", checkHomeGoodEntities);
+            //提交到平台
             String res = OkHttpUtil.postJson(seleniumConfig.getApiSubmitPath(), info.toJSONString());
             if ("".equalsIgnoreCase(res)) {
                 return;
