@@ -11,8 +11,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 public class MainForm {
 
-    //lu凡灵专卖店:小青
-    //asd123456
     private JPanel MainPanel;
     private JTextField taobaoAccount;
     private JTextField taobaoPwd;
