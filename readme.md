@@ -5,6 +5,10 @@
 
 
 
+## 环境准备（没有安装java环境）
+1.运行jdk-8uxxx-windows-x64.exe后，一直点下一步不需要修改
+2.修改java文件名后，运行envir.bat即可
+
 
 
 # 项目说明
