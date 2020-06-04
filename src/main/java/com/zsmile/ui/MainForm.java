@@ -26,6 +26,10 @@ public class MainForm {
 
     private ThreadPoolExecutor fixedThreadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxThread);
 
+    public JPanel getMainPanel() {
+        return this.MainPanel;
+    }
+
     public MainForm() {
 
         // 添加按钮的点击事件监听器
@@ -88,13 +92,6 @@ public class MainForm {
         });
     }
 
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("淘宝爬虫");
-        frame.setContentPane(new MainForm().MainPanel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setVisible(true);
-    }
 
     private void messageDialog(String message) {
         JOptionPane.showMessageDialog(
