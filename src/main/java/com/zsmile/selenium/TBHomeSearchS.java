@@ -131,6 +131,7 @@ public class TBHomeSearchS implements Runnable {
     private void get() {
         while (true) {
             String resString = OkHttpUtil.get(this.seleniumConfig.getApiGetPath(), "");
+            System.out.println("查询结果:" + resString);
             if ("".equalsIgnoreCase(resString)) {
                 break;
             }
